@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+from streamlit_extras.metric_cards import style_metric_cards
 
 # Set page configuration
 st.set_page_config(
@@ -75,6 +76,7 @@ st.markdown("---")
 # Balance Section
 style_section_title("Balance (All Linked Accounts)")
 st.metric(label="Current Balance", value=balance)
+style_metric_cards()  # Ensure the 'style_metric_cards' function is correct, or remove it if not necessary.
 
 # Budget Section
 style_section_title("My Monthly Spending Analysis")
@@ -135,4 +137,3 @@ if user_query:
         st.info("AI Insight: Based on your budgets, focus on reducing utility expenses in Germany to save $50 monthly.")
 else:
     st.write("Awaiting your question. Get tailored insights about your finances!")
-\
