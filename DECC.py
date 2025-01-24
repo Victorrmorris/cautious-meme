@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-from streamlit_extras.metric_cards import style_metric_cards
 
 # Set page configuration
 st.set_page_config(
@@ -76,7 +75,6 @@ st.markdown("---")
 # Balance Section
 style_section_title("Balance (All Linked Accounts)")
 st.metric(label="Current Balance", value=balance)
-style_metric_cards()
 
 # Budget Section
 style_section_title("My Monthly Spending Analysis")
@@ -84,14 +82,16 @@ col1, col2 = st.columns(2)
 
 with col1:
     style_subheader("Germany Budget")
-    st.metric(label="Total Budget", value=budget_data["Germany Budget"]["Total"], delta=f"Spent: {budget_data['Germany Budget']['Spent']}")
+    total_spent_germany = float(budget_data["Germany Budget"]["Spent"].split('$')[1].split(' ')[0].replace(',', ''))
+    st.metric(label="Total Budget", value=budget_data["Germany Budget"]["Total"], delta=f"-${total_spent_germany:.2f}")
     st.write("**Category Breakdown:**")
     for category, amount in budget_data["Germany Budget"]["Categories"].items():
         st.markdown(f"- **{category}:** {amount}")
 
 with col2:
     style_subheader("US Budget")
-    st.metric(label="Total Budget", value=budget_data["US Budget"]["Total"], delta=f"Spent: {budget_data['US Budget']['Spent']}")
+    total_spent_us = float(budget_data["US Budget"]["Spent"].split('$')[1].split(' ')[0].replace(',', ''))
+    st.metric(label="Total Budget", value=budget_data["US Budget"]["Total"], delta=f"-${total_spent_us:.2f}")
     st.write("**Category Breakdown:**")
     for category, amount in budget_data["US Budget"]["Categories"].items():
         st.markdown(f"- **{category}:** {amount}")
