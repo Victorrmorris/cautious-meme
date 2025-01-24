@@ -1,8 +1,6 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
 
 # Set page configuration
 st.set_page_config(
@@ -70,38 +68,6 @@ def style_section_title(title):
 def style_subheader(text):
     st.markdown(f"<h3 style='color: #4CAF50;'>{text}</h3>", unsafe_allow_html=True)
 
-# Plotting Functions
-def plot_budget_comparison(germany_spent, germany_total, us_spent, us_total):
-    # Budget comparison bar chart
-    labels = ['Germany', 'US']
-    spent = [germany_spent, us_spent]
-    total = [germany_total, us_total]
-
-    x = np.arange(len(labels))
-    width = 0.35
-
-    fig, ax = plt.subplots(figsize=(8, 6))
-    ax.bar(x - width / 2, spent, width, label='Spent', color='skyblue')
-    ax.bar(x + width / 2, total, width, label='Total', color='salmon')
-
-    ax.set_ylabel('Amount in USD')
-    ax.set_title('Budget vs Spent Comparison (Germany vs US)')
-    ax.set_xticks(x)
-    ax.set_xticklabels(labels)
-    ax.legend()
-
-    st.pyplot(fig)
-
-def plot_category_breakdown(categories, amounts):
-    # Category breakdown bar chart
-    fig, ax = plt.subplots(figsize=(8, 6))
-    ax.bar(categories, amounts, color='lightgreen')
-    
-    ax.set_ylabel('Amount in USD')
-    ax.set_title('Category Breakdown')
-
-    st.pyplot(fig)
-
 # Main Content
 st.title("📊 Financial Dashboard")
 st.markdown("---")
@@ -110,40 +76,25 @@ st.markdown("---")
 style_section_title("Balance (All Linked Accounts)")
 st.metric(label="Current Balance", value=balance)
 
-# Budget Section with Visuals
+# Budget Section
 style_section_title("My Monthly Spending Analysis")
 col1, col2 = st.columns(2)
 
-# Germany Budget
 with col1:
     style_subheader("Germany Budget")
-    germany_total = float(budget_data["Germany Budget"]["Total"].split('$')[1].replace(',', ''))
-    germany_spent = float(budget_data["Germany Budget"]["Spent"].split('$')[1].split(' ')[0].replace(',', ''))
-    st.metric(label="Total Budget", value=budget_data["Germany Budget"]["Total"], delta=f"-${germany_spent:.2f}")
+    total_spent_germany = float(budget_data["Germany Budget"]["Spent"].split('$')[1].split(' ')[0].replace(',', ''))
+    st.metric(label="Total Budget", value=budget_data["Germany Budget"]["Total"], delta=f"-${total_spent_germany:.2f}")
     st.write("**Category Breakdown:**")
     for category, amount in budget_data["Germany Budget"]["Categories"].items():
         st.markdown(f"- **{category}:** {amount}")
-    
-    # Plot Germany Budget Category Breakdown
-    plot_category_breakdown(list(budget_data["Germany Budget"]["Categories"].keys()),
-                            [float(amount.split('$')[1].replace(',', '')) for amount in budget_data["Germany Budget"]["Categories"].values()])
 
-# US Budget
 with col2:
     style_subheader("US Budget")
-    us_total = float(budget_data["US Budget"]["Total"].split('$')[1].replace(',', ''))
-    us_spent = float(budget_data["US Budget"]["Spent"].split('$')[1].split(' ')[0].replace(',', ''))
-    st.metric(label="Total Budget", value=budget_data["US Budget"]["Total"], delta=f"-${us_spent:.2f}")
+    total_spent_us = float(budget_data["US Budget"]["Spent"].split('$')[1].split(' ')[0].replace(',', ''))
+    st.metric(label="Total Budget", value=budget_data["US Budget"]["Total"], delta=f"-${total_spent_us:.2f}")
     st.write("**Category Breakdown:**")
     for category, amount in budget_data["US Budget"]["Categories"].items():
         st.markdown(f"- **{category}:** {amount}")
-    
-    # Plot US Budget Category Breakdown
-    plot_category_breakdown(list(budget_data["US Budget"]["Categories"].keys()),
-                            [float(amount.split('$')[1].replace(',', '')) for amount in budget_data["US Budget"]["Categories"].values()])
-
-# Plot Budget Comparison
-plot_budget_comparison(germany_spent, germany_total, us_spent, us_total)
 
 # AI Financial Insights
 st.markdown("---")
