@@ -1,13 +1,14 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+from streamlit_extras.metric_cards import style_metric_cards
 
 # Set page configuration
 st.set_page_config(
     page_title="Financial Dashboard",
     layout="wide",
     initial_sidebar_state="expanded",
-    page_icon="📊",  # Added a favicon
+    page_icon="📊",
 )
 
 # Sample Data
@@ -61,58 +62,64 @@ investments = {
 
 ai_insight = "You have $231.84 (€222.33) remaining for both of your May 2024 household budgets."
 
+# Style Improvements
+def style_section_title(title):
+    st.markdown(f"<h2 style='text-align: center; color: #4CAF50;'>{title}</h2>", unsafe_allow_html=True)
+
+def style_subheader(text):
+    st.markdown(f"<h3 style='color: #4CAF50;'>{text}</h3>", unsafe_allow_html=True)
+
 # Main Content
-st.title("Financial Dashboard")
+st.title("📊 Financial Dashboard")
 st.markdown("---")
 
 # Balance Section
-st.header("Balance (All Linked Accounts)")
-st.subheader(balance)
+style_section_title("Balance (All Linked Accounts)")
+st.metric(label="Current Balance", value=balance)
+style_metric_cards()
 
 # Budget Section
-st.header("My Monthly Spending Analysis")
+style_section_title("My Monthly Spending Analysis")
 col1, col2 = st.columns(2)
 
 with col1:
-    st.subheader("Germany Budget")
-    st.metric(label="Total Budget", value=budget_data["Germany Budget"]["Total"], delta=f"Spent: {budget_data['Germany Budget']['Spent']}")  # Ensuring string formatting
-    st.write("Category Breakdown:")
-    if isinstance(budget_data["Germany Budget"]["Categories"], dict):  # Validating the Categories key
-        for category, amount in budget_data["Germany Budget"]["Categories"].items():
-            st.write(f"{category}: {amount}")
+    style_subheader("Germany Budget")
+    st.metric(label="Total Budget", value=budget_data["Germany Budget"]["Total"], delta=f"Spent: {budget_data['Germany Budget']['Spent']}")
+    st.write("**Category Breakdown:**")
+    for category, amount in budget_data["Germany Budget"]["Categories"].items():
+        st.markdown(f"- **{category}:** {amount}")
 
 with col2:
-    st.subheader("US Budget")
-    st.metric(label="Total Budget", value=budget_data["US Budget"]["Total"], delta=f"Spent: {budget_data['US Budget']['Spent']}")  # Ensuring string formatting
-    st.write("Category Breakdown:")
-    if isinstance(budget_data["US Budget"]["Categories"], dict):  # Validating the Categories key
-        for category, amount in budget_data["US Budget"]["Categories"].items():
-            st.write(f"{category}: {amount}")
+    style_subheader("US Budget")
+    st.metric(label="Total Budget", value=budget_data["US Budget"]["Total"], delta=f"Spent: {budget_data['US Budget']['Spent']}")
+    st.write("**Category Breakdown:**")
+    for category, amount in budget_data["US Budget"]["Categories"].items():
+        st.markdown(f"- **{category}:** {amount}")
 
 # AI Financial Insights
 st.markdown("---")
-st.header("AI Financial Analyst Insights")
+style_section_title("AI Financial Analyst Insights")
 st.info(ai_insight)
 
 # Bills Section
-st.header("My Bills")
+style_section_title("My Bills")
 try:
     total_due = sum(float(bill['Amount'].split('$')[1].split(' ')[0].replace(',', '')) for bill in bills)
-    st.write(f"Total Due in Next 7 Days: ${total_due:.2f}")  # Added currency symbol
+    st.metric(label="Total Due in Next 7 Days", value=f"${total_due:.2f}")
 except (IndexError, ValueError, KeyError):
     st.error("Error calculating total due. Please check bill formats.")
 
 for bill in bills:
-    st.write(f"{bill['Name']}: {bill['Amount']} (Due: {bill['Due Date']})")
+    st.markdown(f"- **{bill['Name']}:** {bill['Amount']} (Due: {bill['Due Date']})")
 
 # Credit Card Section
-st.header("My Credit Cards")
-st.subheader(credit_cards["Total Credit Card Debt"])
+style_section_title("My Credit Cards")
+st.metric(label="Total Credit Card Debt", value=credit_cards["Total Credit Card Debt"])
 st.write(credit_cards["Recommendation"])
 
 # Investments Section
-st.header("My Investments")
-st.subheader(investments["Total Investments"])
-st.write("Breakdown:")
+style_section_title("My Investments")
+st.metric(label="Total Investments", value=investments["Total Investments"])
+st.write("**Breakdown:**")
 for account, value in investments["Breakdown"].items():
-    st.write(f"{account}: {value}")
+    st.markdown(f"- **{account}:** {value}")
