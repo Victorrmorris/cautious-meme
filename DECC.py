@@ -1,100 +1,137 @@
 import streamlit as st
-import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
 
 # Set page configuration
 st.set_page_config(
-    page_title="Split Household Spending Insights",
+    page_title="Financial Dashboard",
     layout="wide",
-    page_icon="💰",
+    initial_sidebar_state="expanded",
+    page_icon="📊",
 )
 
 # Sample Data
-spending_data = {
-    "Germany": {
-        "Total Budget": "$3,200.00",
+balance = "$25,580.75 (€24,526.50)"
+budget_data = {
+    "Germany Budget": {
+        "Total": "$3,200.00",
         "Spent": "$3,166.19 (€3,036.30)",
         "Categories": {
-            "Transportation": 62.80,
-            "Rent": 1800.00,
-            "Entertainment": 154.67,
-            "Education": 123.54,
-            "Utilities": 179.20,
-            "Groceries": 845.98,
+            "Transportation": "$62.80",
+            "Rent": "$1,800.00",
+            "Entertainment": "$154.67",
+            "Education": "$123.54",
+            "Utilities": "$179.20",
+            "Groceries": "$845.98",
         },
     },
-    "US": {
-        "Total Budget": "$3,000.00",
+    "US Budget": {
+        "Total": "$3,000.00",
         "Spent": "$2,801.97 (€2,687.30)",
         "Categories": {
-            "Transportation": 113.67,
-            "Mortgage": 1502.16,
-            "Home maintenance": 312.43,
-            "Utilities": 416.82,
-            "Groceries": 456.89,
+            "Transportation": "$113.67",
+            "Mortgage": "$1,502.16",
+            "Home maintenance": "$312.43",
+            "Utilities": "$416.82",
+            "Groceries": "$456.89",
         },
     },
 }
+bills = [
+    {"Name": "Germany Rent Payment", "Amount": "$1,800.00 (Monthly)", "Due Date": "1st June"},
+    {"Name": "O2 - Internet", "Amount": "$39.99 (Monthly)", "Due Date": "1st June"},
+    {"Name": "REWAG - Utilities", "Amount": "$30.00 (Monthly)", "Due Date": "1st June"},
+]
 
-ai_insight = (
-    "Based on your current spending patterns, you may want to focus on reducing "
-    "utility costs in both Germany and the US. In Germany, cutting utility costs "
-    "by €30 can free up funds for unexpected expenses. In the US, consider reallocating "
-    "home maintenance costs to savings for long-term goals."
-)
+credit_cards = {
+    "Total Credit Card Debt": "$5,420.10",
+    "Star Card": "$1,645.98",
+    "USAA": "$3,774.12",
+    "Recommendation": "You're slightly over the recommended 30% (36.13%) utilization rate. Paying down $1,020 would bring your overall rate to 30% or below.",
+}
 
-# Utility: Create a bar chart for spending categories
-def create_spending_chart(categories, title):
-    labels = list(categories.keys())
-    values = list(categories.values())
+investments = {
+    "Total Investments": "$53,926.44",
+    "Breakdown": {
+        "Schwab": "$7,890.32",
+        "Fidelity": "$12,487.23",
+        "Thrift Savings Plan": "$33,548.89",
+    },
+}
 
-    fig, ax = plt.subplots(figsize=(6, 4))
-    ax.barh(labels, values, color="skyblue")
-    ax.set_xlabel("Amount ($)")
-    ax.set_title(title)
-    st.pyplot(fig)
+ai_insight = "You have $231.84 (€222.33) remaining for both of your May 2024 household budgets."
 
-# Main Application
-st.title("💰 Split Household Spending Insights")
-st.markdown("This dashboard provides an overview of spending insights for households in Germany and the US.")
+# Style Improvements
+def style_section_title(title):
+    st.markdown(f"<h2 style='text-align: center; color: #4CAF50;'>{title}</h2>", unsafe_allow_html=True)
+
+def style_subheader(text):
+    st.markdown(f"<h3 style='color: #4CAF50;'>{text}</h3>", unsafe_allow_html=True)
+
+# Main Content
+st.title("📊 Financial Dashboard")
 st.markdown("---")
 
-# Insights Section
-st.header("LLM Spending Insights")
+# Balance Section
+style_section_title("Balance (All Linked Accounts)")
+st.metric(label="Current Balance", value=balance)
+
+# Budget Section
+style_section_title("My Monthly Spending Analysis")
+col1, col2 = st.columns(2)
+
+with col1:
+    style_subheader("Germany Budget")
+    total_spent_germany = float(budget_data["Germany Budget"]["Spent"].split('$')[1].split(' ')[0].replace(',', ''))
+    st.metric(label="Total Budget", value=budget_data["Germany Budget"]["Total"], delta=f"-${total_spent_germany:.2f}")
+    st.write("**Category Breakdown:**")
+    for category, amount in budget_data["Germany Budget"]["Categories"].items():
+        st.markdown(f"- **{category}:** {amount}")
+
+with col2:
+    style_subheader("US Budget")
+    total_spent_us = float(budget_data["US Budget"]["Spent"].split('$')[1].split(' ')[0].replace(',', ''))
+    st.metric(label="Total Budget", value=budget_data["US Budget"]["Total"], delta=f"-${total_spent_us:.2f}")
+    st.write("**Category Breakdown:**")
+    for category, amount in budget_data["US Budget"]["Categories"].items():
+        st.markdown(f"- **{category}:** {amount}")
+
+# AI Financial Insights
+st.markdown("---")
+style_section_title("AI Financial Analyst Insights")
 st.info(ai_insight)
 
-# Spending Analysis for Germany
-col1, col2 = st.columns(2)
-with col1:
-    st.subheader("Germany Household Spending")
-    st.metric(
-        label="Total Budget",
-        value=spending_data["Germany"]["Total Budget"],
-        delta=f"Spent: {spending_data['Germany']['Spent']}"
-    )
-    create_spending_chart(spending_data["Germany"]["Categories"], "Germany Spending Breakdown")
+# Bills Section
+style_section_title("My Bills")
+try:
+    total_due = sum(float(bill['Amount'].split('$')[1].split(' ')[0].replace(',', '')) for bill in bills)
+    st.metric(label="Total Due in Next 7 Days", value=f"${total_due:.2f}")
+    st.success("Bill data processed successfully!")
+except (IndexError, ValueError, KeyError) as e:
+    st.error(f"Error calculating total due. Please check bill formats. Details: {e}")
 
-# Spending Analysis for US
-with col2:
-    st.subheader("US Household Spending")
-    st.metric(
-        label="Total Budget",
-        value=spending_data["US"]["Total Budget"],
-        delta=f"Spent: {spending_data['US']['Spent']}"
-    )
-    create_spending_chart(spending_data["US"]["Categories"], "US Spending Breakdown")
+for bill in bills:
+    st.markdown(f"- **{bill['Name']}:** {bill['Amount']} (Due: {bill['Due Date']})")
 
-# User Interaction for Insights
-st.markdown("---")
-st.subheader("Ask Your Financial AI Assistant")
-user_query = st.text_input("Type your question about spending insights or budgeting:")
+# Credit Card Section
+style_section_title("My Credit Cards")
+st.metric(label="Total Credit Card Debt", value=credit_cards["Total Credit Card Debt"])
+st.write(credit_cards["Recommendation"])
+
+# Investments Section
+style_section_title("My Investments")
+st.metric(label="Total Investments", value=investments["Total Investments"])
+st.write("**Breakdown:**")
+for account, value in investments["Breakdown"].items():
+    st.markdown(f"- **{account}:** {value}")
+
+# LLM Prompt Query Box
+style_section_title("Ask Your Financial AI Assistant")
+user_query = st.text_input("Type your question about cross-border spending or budgeting below:")
 if user_query:
     st.write(f"**Your Question:** {user_query}")
     with st.spinner("Processing your query..."):
-        # Simulated AI response for demo purposes
-        st.success("AI Insight: Consider adjusting grocery budgets in both households to align better with inflation trends.")
+        # Simulated AI response
+        st.info("AI Insight: Based on your budgets, focus on reducing utility expenses in Germany to save $50 monthly.")
 else:
-    st.write("Awaiting your question. Get tailored insights for your finances!")
-
-# Footer
-st.markdown("---")
-st.caption("Developed for households managing cross-border spending.")
+    st.write("Awaiting your question. Get tailored insights about your finances!")
