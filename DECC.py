@@ -1,13 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-
-# Check if `streamlit-extras` is installed
-try:
-    from streamlit_extras.metric_cards import style_metric_cards
-    extras_installed = True
-except ImportError:
-    extras_installed = False
+from streamlit_extras.metric_cards import style_metric_cards
 
 # Set page configuration
 st.set_page_config(
@@ -82,8 +76,7 @@ st.markdown("---")
 # Balance Section
 style_section_title("Balance (All Linked Accounts)")
 st.metric(label="Current Balance", value=balance)
-if extras_installed:
-    style_metric_cards()
+style_metric_cards()
 
 # Budget Section
 style_section_title("My Monthly Spending Analysis")
@@ -113,8 +106,9 @@ style_section_title("My Bills")
 try:
     total_due = sum(float(bill['Amount'].split('$')[1].split(' ')[0].replace(',', '')) for bill in bills)
     st.metric(label="Total Due in Next 7 Days", value=f"${total_due:.2f}")
-except (IndexError, ValueError, KeyError):
-    st.error("Error calculating total due. Please check bill formats.")
+    st.success("Bill data processed successfully!")
+except (IndexError, ValueError, KeyError) as e:
+    st.error(f"Error calculating total due. Please check bill formats. Details: {e}")
 
 for bill in bills:
     st.markdown(f"- **{bill['Name']}:** {bill['Amount']} (Due: {bill['Due Date']})")
@@ -130,3 +124,14 @@ st.metric(label="Total Investments", value=investments["Total Investments"])
 st.write("**Breakdown:**")
 for account, value in investments["Breakdown"].items():
     st.markdown(f"- **{account}:** {value}")
+
+# LLM Prompt Query Box
+style_section_title("Ask Your Financial AI Assistant")
+user_query = st.text_input("Type your question about cross-border spending or budgeting below:")
+if user_query:
+    st.write(f"**Your Question:** {user_query}")
+    with st.spinner("Processing your query..."):
+        # Simulated AI response
+        st.info("AI Insight: Based on your budgets, focus on reducing utility expenses in Germany to save $50 monthly.")
+else:
+    st.write("Awaiting your question. Get tailored insights about your finances!")
