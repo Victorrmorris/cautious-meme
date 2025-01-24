@@ -1,9 +1,13 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-from streamlit_extras.metric_cards import style_metric_cards
-extras_installed = True
-extras_installed = False
+
+# Check if `streamlit-extras` is installed
+try:
+    from streamlit_extras.metric_cards import style_metric_cards
+    extras_installed = True
+except ImportError:
+    extras_installed = False
 
 # Set page configuration
 st.set_page_config(
@@ -78,7 +82,8 @@ st.markdown("---")
 # Balance Section
 style_section_title("Balance (All Linked Accounts)")
 st.metric(label="Current Balance", value=balance)
-style_metric_cards()
+if extras_installed:
+    style_metric_cards()
 
 # Budget Section
 style_section_title("My Monthly Spending Analysis")
@@ -125,10 +130,3 @@ st.metric(label="Total Investments", value=investments["Total Investments"])
 st.write("**Breakdown:**")
 for account, value in investments["Breakdown"].items():
     st.markdown(f"- **{account}:** {value}")
-
-# LLM Prompt Query Box
-style_section_title("Ask Your Financial AI Assistant")
-user_query = st.text_input("Type your question about cross-border spending or budgeting below:")
-if user_query:
-    st.write(f"**Your Question:** {user_query}")
-    st.info("The AI Assistant is processing your question. Insights will appear here.")
