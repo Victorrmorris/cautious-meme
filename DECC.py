@@ -97,7 +97,7 @@ st.info(ai_insight)
 # Bills Section
 st.header("My Bills")
 try:
-    total_due = sum(float(bill['Amount'].split('$')[1].split()[0]) for bill in bills)
+    total_due = sum(float(bill['Amount'].split('$')[1].split(' ')[0].replace(',', '')) for bill in bills)
     st.write(f"Total Due in Next 7 Days: ${total_due:.2f}")  # Added currency symbol
 except (IndexError, ValueError, KeyError):
     st.error("Error calculating total due. Please check bill formats.")
